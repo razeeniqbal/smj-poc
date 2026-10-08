@@ -113,10 +113,39 @@ function getIssueSortDate(iss) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initSidebarToggle();
   initCharts();
   fetchDashboardData();
   setupFilterHandlers();
 });
+
+function initSidebarToggle() {
+  const btn = document.getElementById('sidebar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  if (!btn || !sidebar) return;
+
+  const sync = () => {
+    const collapsed = document.documentElement.classList.contains('sidebar-collapsed');
+    const label = collapsed ? 'Expand sidebar' : 'Collapse sidebar';
+    btn.setAttribute('aria-expanded', String(!collapsed));
+    btn.setAttribute('aria-label', label);
+    btn.title = label;
+  };
+  sync();
+
+  btn.addEventListener('click', () => {
+    const collapsed = document.documentElement.classList.toggle('sidebar-collapsed');
+    try {
+      localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+    } catch (e) {}
+    sync();
+  });
+
+  // Charts size to their container, so re-fit them once the width animation ends
+  sidebar.addEventListener('transitionend', (e) => {
+    if (e.propertyName === 'width') window.dispatchEvent(new Event('resize'));
+  });
+}
 
 function initCharts() {
   const trendDom = document.getElementById('trendChart');
